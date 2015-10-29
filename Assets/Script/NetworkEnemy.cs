@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class NetworkEnemy : Photon.MonoBehaviour
@@ -17,6 +18,7 @@ public class NetworkEnemy : Photon.MonoBehaviour
 	private float moveSpeedPerSec = 1f;
 	private float elapsedTime = 0f;
 	private float direction = 1f;
+
     void Update()
     {
         if (!photonView.isMine)
@@ -36,14 +38,19 @@ public class NetworkEnemy : Photon.MonoBehaviour
             {
                 elapsedTime = 0f;
                 transform.position = new Vector3(transform.position.x + 1f * direction, transform.position.y, 0f);
+
+                //transform.position = new Vector3(transform.position.x + 1f * GameManager.direction, transform.position.y, 0f);
             }
 
             if (transform.position.x > 86)
             {
                 direction = -1;
+                //GameManager.direction = -1;
             }
             else if (transform.position.x < -86)
             {
+
+                //GameManager.direction = 1;
                 direction = 1;
             }
             //if (Input.GetKey(KeyCode.LeftArrow))
@@ -83,5 +90,27 @@ public class NetworkEnemy : Photon.MonoBehaviour
 
 
         }
+    }
+	void OnCollisionEnter(Collision col)
+	{
+	    var pointText = GameObject.Find("Point").GetComponent<Text>();
+        var point = int.Parse(pointText.text);
+	    pointText.text = (point+1).ToString();
+        if (photonView.isMine)
+	    {
+	        PhotonNetwork.Destroy(gameObject);
+	    }
+	    else
+	    {
+            this.photonView.RPC("DestroyRpc", PhotonTargets.AllBuffered);
+        }
+    }
+
+    [PunRPC]
+    public IEnumerator DestroyRpc()
+    {
+        GameObject.Destroy(this.gameObject);
+        yield return 0; // if you allow 1 frame to pass, the object's OnDestroy() method gets called and cleans up references.
+        //PhotonNetwork.UnAllocateViewID(this.photonView.viewID);
     }
 }

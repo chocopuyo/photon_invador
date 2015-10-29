@@ -10,6 +10,7 @@ using System.Collections;
 public class SpacePhotonScript : Photon.MonoBehaviour
 {
 
+    private bool hostFlag = false;
     void Start()
     {
 //		PhotonNetwork.logLevel = PhotonLogLevel.Full;
@@ -27,15 +28,34 @@ public class SpacePhotonScript : Photon.MonoBehaviour
 
     public void OnPhotonRandomJoinFailed()
     {
-        PhotonNetwork.CreateRoom(null);
+        hostFlag = true;
+        RoomOptions roomOptions = new RoomOptions() { isVisible = true, maxPlayers = 2 };
+        PhotonNetwork.CreateRoom(null, roomOptions, TypedLobby.Default);
+        //PhotonNetwork.CreateRoom(null);
     }
 	public void OnJoinedRoom()
     {
 		GameObject monster = PhotonNetwork.Instantiate("Unit", Vector3.zero, Quaternion.identity, 0);
-//		CharacterController controller = monster.GetComponent<CharacterController>();
-//		controller.enabled = true;
-//		 camera = monster.GetComponent<CharacterCamera>();
-//		camera.enabled = true;
+	    if (hostFlag)
+	    {
+            SetEnemies();
+        }
+        //		CharacterController controller = monster.GetComponent<CharacterController>();
+        //		controller.enabled = true;
+        //		 camera = monster.GetComponent<CharacterCamera>();
+        //		camera.enabled = true;
+    }
+
+    private void SetEnemies()
+    {
+        for (var y = 40; y <= 90; y += 15)
+        {
+            for (var x = -90; x < 90; x += 15)
+            {
+                Vector3 position = new Vector3(x, y, 0f);
+                GameObject enemy = PhotonNetwork.Instantiate("Enemy", position, Quaternion.identity, 0);
+            }
+        }
     }
 
     public void OnJoinedLobby()

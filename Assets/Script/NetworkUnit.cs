@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class NetworkUnit : Photon.MonoBehaviour {
@@ -36,18 +37,27 @@ public class NetworkUnit : Photon.MonoBehaviour {
 
     void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        UnityEngine.Debug.Log("point");
         if (stream.isWriting)
         {
+            var pointText = GameObject.Find("Point").GetComponent<Text>();
+            string point = pointText.text;
             // We own this player: send the others our data
             stream.SendNext(transform.position);
             stream.SendNext(transform.rotation);
+            UnityEngine.Debug.Log(pointText.text);
+            stream.SendNext(pointText.text);
+            UnityEngine.Debug.Log("point2");
         }
         else
         {
             // Network player, receive data
             this.correctPlayerPos = (Vector3)stream.ReceiveNext();
             this.correctPlayerRot = (Quaternion)stream.ReceiveNext();
-
+            UnityEngine.Debug.Log((Vector3)stream.ReceiveNext());
+            var pointText = GameObject.Find("EnemyPoint").GetComponent<Text>();
+            UnityEngine.Debug.Log("point3");
+            pointText.text = (string)stream.ReceiveNext();
  
         }
     }
